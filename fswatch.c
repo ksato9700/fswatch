@@ -14,6 +14,8 @@
  * adapted from the FSEvents api PDF
 */
 
+#define MAX_ARGS 16
+
 extern char **environ;
 //the command to run
 char *to_run;
@@ -31,17 +33,26 @@ void callback(
   int   status;
 
   /*printf("Callback called\n"); */
+  if(2*numEvents+2 > MAX_ARGS) {
+    fprintf(stderr, "error: too many events\n");
+    exit(1);
+  }
 
   if((pid = fork()) < 0) {
     fprintf(stderr, "error: couldn't fork \n");
     exit(1);
   } else if (pid == 0) {
-    char *args[4] = {
-      "/bin/bash",
-      "-c",
+    char *args[MAX_ARGS] = {
       to_run,
-      0
     };
+    char flags[MAX_ARGS][11];
+    int i = 0;
+    for(i=0;i<numEvents; i++) {
+      sprintf(flags[i], "0x%08x", (unsigned int)eventFlags[i]);
+      args[i*2+1] = ((char**)eventPaths)[i];
+      args[i*2+2] = flags[i];
+    }
+    args[i*2+1] = 0;
     if(execve(args[0], args, environ) < 0) {
       fprintf(stderr, "error: error executing\n");
       exit(1);
