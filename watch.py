@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import sys
+import time
+from datetime import datetime
 from itertools import izip
 
 flags_map = (
@@ -26,7 +28,7 @@ def main():
 
     for path, flags in izip(iargv, iargv):
         flags = parse_flags(flags)
-        print path, "|".join(flags)
+        print datetime.fromtimestamp(int(time.time())), path, "|".join(flags)
 
 if __name__ == "__main__":
     main()
